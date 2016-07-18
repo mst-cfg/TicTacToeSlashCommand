@@ -106,23 +106,19 @@
 			   out.print(currentUser+", please wait for the next opportunity to play");
 			   return;
 		   }
-		   if (totalMoves % 2 == 1) {
-		      whoseMove = ":x:";
-		   }
-		   else {
-		   	  whoseMove = ":o:";
-		   }
-		   moveSpot = nums[Integer.parseInt(userCommand)-1];
-		   text = ":"+moveSpot+":";	
 		   if (currentUser.equals(lPlayer)) {
-			   if (totalMoves == 1) {
-				   return;
-			   }
-			   else {
-		   	   		out.print(":no_entry:Not your turn, "+currentUser+":exclamation:");
-			   }
+			   out.print(":no_entry:Not your turn, "+currentUser+":exclamation:");
+		   	   return;
 		   }
-		   else {           
+		   else {         
+			  if (totalMoves % 2 == 1) {
+				      whoseMove = ":x:";
+			  }
+			  else {
+				   	  whoseMove = ":o:";
+			  }
+			  moveSpot = nums[Integer.parseInt(userCommand)-1];
+			  text = ":"+moveSpot+":";	
 			  board.set(board.indexOf(text),whoseMove);
 			  int userMoves = 0;
 		      for (String move : board){
