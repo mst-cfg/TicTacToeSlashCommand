@@ -12,6 +12,10 @@
 	   String lastMove = (String) ctx.getAttribute("lastMove");
 	   String currentBoard = "";
 	   Enumeration parameterNames = request.getParameterNames();
+	   Date now = new Date();
+	   int minRem = 60-now.getMinutes();
+	   int secRem = 60-now.getSeconds();
+	   String timeLeft = null;
 	   String text = null;
 	   String currentUser = null;
 	   String moveSpot = null;
@@ -20,6 +24,12 @@
 	   JSONObject json = new JSONObject();
 	   String jTxt = "text";
 	   json.put("response_type","in_channel");
+	   if (minRem % 2 == 1) {
+		   timeLeft = Integer.toString(secRem) + "s left";
+	   }
+	   else {
+		   timeLeft = "1m " + Integer.toString(secRem) + "s left";
+	   }
 	   while(parameterNames.hasMoreElements()) {
 	      String paramName = (String)parameterNames.nextElement();
 	      String paramValue = request.getParameter(paramName);
@@ -49,10 +59,7 @@
 			   out.print("Invite another player by typing 'vs' after the slash command.");
 			   return;
 		   }
-		   else if (!players.contains(currentUser)) {
-			   out.print(currentUser+", please wait for the next opportunity to play");
-			   return;
-		   }
+
 		   else if (userCommand.equals("yes") && players.contains(currentUser)) {
 			   json.remove(jTxt);
 			   if (lPlayer.equals(currentUser)) {
@@ -88,11 +95,16 @@
 			    	  currentBoard += move;
 			       }
 			   if (lPlayer.equals(players.get(0))){
-				   out.print(currentBoard+"\nPlayers: "+players.get(0)+" and "+players.get(1)+". It is now "+players.get(1)+"'s turn.");
+				   out.print(currentBoard+"\nPlayers: "+players.get(0)+" and "+players.get(1)+". It is now "+players.get(1)+"'s turn. "+timeLeft);
 			   }
 			   else {
-				   out.print(currentBoard+"\nPlayers: "+players.get(0)+" and "+players.get(1)+". It is now "+players.get(0)+"'s turn.");
+				   out.print(currentBoard+"\nPlayers: "+players.get(0)+" and "+players.get(1)+". It is now "+players.get(0)+"'s turn. "+timeLeft);
 			   }
+			   return;
+		   }
+		   else if (!players.contains(currentUser)) {
+			   out.print(currentUser+", please wait for the next opportunity to play");
+			   return;
 		   }
 	   }
 	   else {
@@ -116,49 +128,54 @@
 				   	  whoseMove = ":o:";
 			  }
 			  moveSpot = nums[Integer.parseInt(userCommand)-1];
-			  text = ":"+moveSpot+":";	
-			  board.set(board.indexOf(text),whoseMove);
-			  int userMoves = 0;
-		      for (String move : board){
-		    	  if (move.startsWith(":x:") || move.startsWith(":o:")) {
-		    		  userMoves++;
-		    	  }
-		    	  currentBoard += move;
-		       }
-		      ctx.setAttribute("currentBoard", board);
-		      boolean win = (board.get(0).equals(board.get(1)) && board.get(1).equals(board.get(2))) || 
-		  	    		(board.get(0).equals(board.get(4)) && board.get(4).equals(board.get(8))) ||
-		  	      		(board.get(0).equals(board.get(5)) && board.get(5).equals(board.get(10))) ||
-		  				(board.get(1).equals(board.get(5)) && board.get(5).equals(board.get(9))) ||
-		  				(board.get(2).equals(board.get(5)) && board.get(5).equals(board.get(8))) ||
-		  				(board.get(2).equals(board.get(6)) && board.get(6).equals(board.get(10))) ||
-		  				(board.get(4).equals(board.get(5)) && board.get(5).equals(board.get(6))) ||
-		  				(board.get(8).equals(board.get(9)) && board.get(9).equals(board.get(10)));
-		      json.remove(jTxt);
-		      if (userMoves < 9) {
-		    	  if (win) {
-		  				json.put(jTxt,currentBoard+"\n"+currentUser+" just won!  Play again?");
-		  	      }
-		    	  else {
-		    		  if (currentUser.equals(players.get(0))){
-		    			  json.put(jTxt,currentBoard+"\n"+currentUser+" (the "+whoseMove.substring(1,2).toUpperCase()+" player)"+" just made a move. It is now "+players.get(1)+"'s turn.");
-		    		  }
-		    		  else {
-		    			  json.put(jTxt,currentBoard+"\n"+currentUser+" (the "+whoseMove.substring(1,2).toUpperCase()+" player)"+" just made a move. It is now "+players.get(0)+"'s turn.");
-		    		  }
-		    	  }
-		    	  out.print(json);
-		    	  ctx.setAttribute("lPlayer", currentUser);
-		      }
-		      else {
-		    	  if (win) {
-		  				json.put(jTxt,currentBoard+"\n"+currentUser+" just won!  Play again?");
-		  	      }
-		    	  else {
-					  json.put(jTxt,currentBoard+"\nDraw.  Play again?");
-		    	  }
-		    	  out.print(json);
-		      }		      
+			  text = ":"+moveSpot+":";
+			  try {
+				  board.set(board.indexOf(text),whoseMove);
+				  int userMoves = 0;
+			      for (String move : board){
+			    	  if (move.startsWith(":x:") || move.startsWith(":o:")) {
+			    		  userMoves++;
+			    	  }
+			    	  currentBoard += move;
+			       }
+			      ctx.setAttribute("currentBoard", board);
+			      boolean win = (board.get(0).equals(board.get(1)) && board.get(1).equals(board.get(2))) || 
+			  	    		(board.get(0).equals(board.get(4)) && board.get(4).equals(board.get(8))) ||
+			  	      		(board.get(0).equals(board.get(5)) && board.get(5).equals(board.get(10))) ||
+			  				(board.get(1).equals(board.get(5)) && board.get(5).equals(board.get(9))) ||
+			  				(board.get(2).equals(board.get(5)) && board.get(5).equals(board.get(8))) ||
+			  				(board.get(2).equals(board.get(6)) && board.get(6).equals(board.get(10))) ||
+			  				(board.get(4).equals(board.get(5)) && board.get(5).equals(board.get(6))) ||
+			  				(board.get(8).equals(board.get(9)) && board.get(9).equals(board.get(10)));
+			      json.remove(jTxt);
+			      if (userMoves < 9) {
+			    	  if (win) {
+			  				json.put(jTxt,currentBoard+"\n"+currentUser+" just won!  Play again? "+timeLeft+" until a new game can begin.");
+			  	      }
+			    	  else {
+			    		  if (currentUser.equals(players.get(0))){
+			    			  json.put(jTxt,currentBoard+"\n"+currentUser+" (the "+whoseMove.substring(1,2).toUpperCase()+" player)"+" just made a move. It is now "+players.get(1)+"'s turn. "+timeLeft);
+			    		  }
+			    		  else {
+			    			  json.put(jTxt,currentBoard+"\n"+currentUser+" (the "+whoseMove.substring(1,2).toUpperCase()+" player)"+" just made a move. It is now "+players.get(0)+"'s turn. "+timeLeft);
+			    		  }
+			    	  }
+			    	  out.print(json);
+			    	  ctx.setAttribute("lPlayer", currentUser);
+			      }
+			      else {
+			    	  if (win) {
+			  				json.put(jTxt,currentBoard+"\n"+currentUser+" just won!  Play again? "+timeLeft+" until a new game can begin.");
+			  	      }
+			    	  else {
+						  json.put(jTxt,currentBoard+"\nDraw.  Play again? "+timeLeft+" until a new game can begin.");
+			    	  }
+			    	  out.print(json);
+			      }		      
+			   }
+			  catch (Exception e) {
+				  out.print("Illegal move. Pick again. "+timeLeft);
+			  }
 		   }
 	   }
    }
