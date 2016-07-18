@@ -3,14 +3,12 @@
 <%
    if (request.getParameter("token").equals("yqMjTrNG5IZj8dBF0jip7yBY")) {
 	   ServletContext ctx = getServletContext();
-	   int totalMoves = (Integer) ctx.getAttribute("totalmoves");
 	   String[] nums = {"one","two","three","four","five","six","seven","eight","nine"};
 	   ArrayList<String> board = (ArrayList<String>) ctx.getAttribute("currentBoard");
 	   Map<String, String> params = new HashMap<String, String>();
 	   String lPlayer = (String) ctx.getAttribute("lPlayer");
 	   String[] numArray = {"1","2","3","4","5","6","7","8","9"};
 	   ArrayList<String> players = (ArrayList<String>) ctx.getAttribute("players");
-	   ArrayList<HttpSession> sessions = (ArrayList<HttpSession>) ctx.getAttribute("sessions");
 	   String lastMove = (String) ctx.getAttribute("lastMove");
 	   String currentBoard = "";
 	   Enumeration parameterNames = request.getParameterNames();
@@ -111,7 +109,7 @@
 		   	   return;
 		   }
 		   else {         
-			  if (totalMoves % 2 == 1) {
+			  if (currentUser.equals(players.get(0))) {
 				      whoseMove = ":x:";
 			  }
 			  else {
